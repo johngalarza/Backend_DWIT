@@ -2,15 +2,11 @@
 header("Content-Type: application/json");
 require_once 'conexion.php';
 
-$result = $conn->query("SELECT * FROM user");
-
-$usuarios = [];
-
-while ($fila = $result->fetch_assoc()) {
-    $usuarios[] = $fila;
+try {
+    $stmt = $conn->query("SELECT * FROM usuarios"); 
+    $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($usuarios);
+} catch (PDOException $e) {
+    echo json_encode(["error" => $e->getMessage()]);
 }
-
-echo json_encode($usuarios);
-
-$conn->close();
 ?>

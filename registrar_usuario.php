@@ -18,19 +18,21 @@ $correo = $data['correo'] ?? '';
 $contraseña = $data['contraseña'] ?? '';
 
 if ($nombre && $correo && $contraseña) {
-    $stmt = $conn->prepare("INSERT INTO user (nombre, correo, contraseña) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $nombre, $correo, $contraseña);
+    try {
+        $stmt = $conn->prepare("INSERT INTO usuarios (nombre, correo, contraseña) VALUES (:nombre, :correo, :pass)");
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->bindParam(':correo', $correo);
+        $stmt->bindParam(':pass', $contraseña);
 
-    if ($stmt->execute()) {
-        echo json_encode(["mensaje" => "Usuario insertado con éxito"]);
-    } else {
-        echo json_encode(["error" => "Error al insertar"]);
+        if ($stmt->execute()) {
+            echo json_encode(["mensaje" => "Usuario insertado con éxito"]);
+        } else {
+            echo json_encode(["error" => "Error al insertar"]);
+        }
+    } catch (PDOException $e) {
+        echo json_encode(["error" => $e->getMessage()]);
     }
-
-    $stmt->close();
 } else {
     echo json_encode(["error" => "Faltan datos"]);
 }
-
-$conn->close();
 ?>
