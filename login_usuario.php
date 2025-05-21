@@ -52,7 +52,7 @@ try {
             'id'=> $resultado["id"],
             "nombre" => $resultado["nombre"],
             "correo"=> $resultado["correo"],
-            "fecha_namiento"=> $resultado["fecha_nacimiento"],
+            "fecha_nacimiento"=> $resultado["fecha_nacimiento"],
             "años_entrenando"=> $resultado["años_entrenando"],
         ]);
     }else{
