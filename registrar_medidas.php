@@ -13,7 +13,7 @@ require_once 'conexion.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$user_id      = 1;
+$user_id      = $data['user_id'] ?? null;
 $altura       = $data['altura'] ?? null;
 $peso         = $data['peso'] ?? null;
 $brazo_izq    = $data['brazo_izq'] ?? null;
