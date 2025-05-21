@@ -22,8 +22,10 @@ if (!is_array($data)) {
 $nombre = trim($data['nombre'] ?? '');
 $correo = trim($data['correo'] ?? '');
 $contraseña = trim($data['contraseña'] ?? '');
+$fecha_nacimiento = trim($data['fecha_nacimiento'] ??'');
+$años_entrenando = trim($data['años_entrenando'] ??'');
 
-if (empty($nombre) || empty($correo) || empty($contraseña)) {
+if (empty($nombre) || empty($correo) || empty($contraseña) || empty($fecha_nacimiento)) {
     http_response_code(422); 
     echo json_encode(["error" => "Faltan datos requeridos"]);
     exit();
@@ -47,10 +49,12 @@ try {
         exit();
     }
 
-    $stmt = $conn->prepare("INSERT INTO usuarios (nombre, correo, contraseña) VALUES (:nombre, :correo, :pass)");
+    $stmt = $conn->prepare("INSERT INTO usuarios (nombre, correo, contraseña, fecha_nacimiento, años_entrenando) VALUES (:nombre, :correo, :pass, :fecha_nacimiento, :years_training)");
     $stmt->bindParam(':nombre', $nombre);
     $stmt->bindParam(':correo', $correo);
     $stmt->bindParam(':pass', $contraseña); 
+    $stmt->bindParam(':fecha_nacimiento', $fecha_nacimiento); 
+    $stmt->bindParam(':years_training', $años_entrenando); 
 
     if ($stmt->execute()) {
         $id = $conn->lastInsertId();
@@ -58,7 +62,9 @@ try {
         echo json_encode([
             'id'=> $id,
             "nombre" => $nombre,
-            "correo"=> $correo
+            "correo"=> $correo,
+            'fecha_nacimiento' => $fecha_nacimiento,
+            'años_entrenando' => $años_entrenando
         ]);
     } else {
         http_response_code(500);
