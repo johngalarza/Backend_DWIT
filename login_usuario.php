@@ -19,11 +19,10 @@ if (!is_array($data)) {
     exit();
 }
 
-$nombre = trim($data['nombre'] ?? '');
 $correo = trim($data['correo'] ?? '');
 $contraseña = trim($data['contraseña'] ?? '');
 
-if (empty($nombre) || empty($correo) || empty($contraseña)) {
+if (empty($correo) || empty($contraseña)) {
     http_response_code(422); 
     echo json_encode(["error" => "Faltan datos requeridos"]);
     exit();
@@ -36,36 +35,30 @@ if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
 }
 
 try {
-    $checkStmt = $conn->prepare("SELECT COUNT(*) FROM usuarios where correo = :correo");
-    $checkStmt->bindParam(":correo", $correo);
-    $checkStmt->execute();
-    $count = $checkStmt->fetchColumn();
+    $stmt = $conn->prepare("SELECT * FROM usuarios where correo = :correo AND contraseña = :pass");
+    $stmt->bindParam(":correo", $correo);
+    $stmt->bindParam(":pass", $contraseña);
 
-    if ($count > 0) {
-        http_response_code(409);
-        echo json_encode(["error"=> "Este correo ya fue registrado"]);
+    if(!($stmt->execute())){
+        http_response_code(500);
+        echo json_encode(["error" => "No se pudo insertar el usuario"]);
         exit();
     }
 
-    $stmt = $conn->prepare("INSERT INTO usuarios (nombre, correo, contraseña) VALUES (:nombre, :correo, :pass)");
-    $stmt->bindParam(':nombre', $nombre);
-    $stmt->bindParam(':correo', $correo);
-    $stmt->bindParam(':pass', $contraseña); 
-
-    if ($stmt->execute()) {
-        $id = $conn->lastInsertId();
-        http_response_code(201);
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($resultado) {
+        http_response_code(200);
         echo json_encode([
-            'id'=> $id,
-            "nombre" => $nombre,
-            "correo"=> $correo
+            'id'=> $resultado["id"],
+            "nombre" => $resultado["nombre"],
+            "correo"=> $resultado["correo"],
         ]);
-    } else {
-        http_response_code(500);
-        echo json_encode(["error" => "No se pudo insertar el usuario"]);
+    }else{
+        http_response_code(409);
+        echo json_encode(["error"=> "Este correo no ha sido registrado"]);
     }
+    
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(["error" => "Error del servidor", "detalle" => $e->getMessage()]);
 }
-?>
